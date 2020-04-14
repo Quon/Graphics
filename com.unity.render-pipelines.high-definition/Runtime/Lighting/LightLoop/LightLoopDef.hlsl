@@ -110,7 +110,15 @@ float4 SampleEnv(LightLoopContext lightLoopContext, int index, float3 texCoord, 
 #else
             color.a = any(ndc.xyz < 0) || any(ndc.xy > 1) ? 0.0 : 1.0;
 #endif
+<<<<<<< HEAD
             float3 capturedForwardWS = _Env2DCaptureForward[index].xyz;
+=======
+            float3 capturedForwardWS = float3(
+                _Env2DCaptureForward[index * 3 + 0],
+                _Env2DCaptureForward[index * 3 + 1],
+                _Env2DCaptureForward[index * 3 + 2]
+            );
+>>>>>>> oldSRP/HDRP/ies_lights
             if (dot(capturedForwardWS, texCoord) < 0.0)
                 color.a = 0.0;
         }
