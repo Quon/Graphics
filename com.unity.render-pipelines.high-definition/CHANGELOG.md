@@ -532,6 +532,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed culling of planar reflection probes that change position (case 1218651)
 - Fixed null reference when processing lightprobe (case 1235285)
 - Fix issue causing wrong planar reflection rendering when more than one camera is present.
+- Fixed issue with screen-space shadows not enabled properly when RT is disabled (case 1235821)
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
