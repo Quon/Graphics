@@ -477,6 +477,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _ThicknessRemap = Shader.PropertyToID("_ThicknessRemap");
 
         public static readonly int _Cubemap = Shader.PropertyToID("_Cubemap");
+        public static readonly int _Cloudmap = Shader.PropertyToID("_Cloudmap");
         public static readonly int _Flowmap = Shader.PropertyToID("_Flowmap");
         public static readonly int _InvOmegaP = Shader.PropertyToID("_InvOmegaP");
         public static readonly int _DistortionParam = Shader.PropertyToID("_DistortionParam");

@@ -22,9 +22,11 @@ After you add an **HDRI Sky** override, you must set the Volume to use **HDRI Sk
 | Property                         | Description                                                  |
 | -------------------------------- | ------------------------------------------------------------ |
 | **HDRI Sky**                     | Assign a HDRI Texture that HDRP uses to render the sky.      |
-| **Distortion*                    | Enable or disable UV distortion. |
-| - **Procedural*                  | Check the box to enable procedural distortion. |
-| -- **Flowmap*                    | Assign a flowmap that HDRP uses to distort uvs when rendering the sky. Only available if **Procedural is unchecked. |
+| **Cloud Layer**                  | Enable to have a cloud layer on top of the sky. |
+| - **Cloud Map**                  | Assign a texture that HDRP uses to render the clouds. |
+| **Distortion**                   | Check the box to enable UV distortion on the **HDRI Sky** or the **Cloud Map** if one is used. |
+| - **Procedural**                 | Check the box to compute distortion procedurally. |
+| -- **Flowmap**                   | Assign a flowmap that HDRP uses to distort UVs when rendering the sky. Only available if **Procedural** is not checked. |
 | - **Distortion Rotation**        | Use the slider to set the angle to rotate the distortion, in degrees. |
 | - **Loop Time**                  | Set the period of the distortion loop, in seconds. |
 | - **Amplitude**                  | Set the amplitude of the distortion. |

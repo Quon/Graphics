@@ -13,6 +13,12 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <summary>Cubemap used to render the HDRI sky.</summary>
         [Tooltip("Specify the cubemap HDRP uses to render the sky.")]
         public CubemapParameter         hdriSky             = new CubemapParameter(null);
+        /// <summary>Enable to have a cloud layer on top of the sky.</summary>
+        [Tooltip("Enable to have a cloud layer on top of the sky.")]
+        public BoolParameter            enableCloudLayer    = new BoolParameter(false);
+        /// <summary>Cubemap used to render the clouds.</summary>
+        [Tooltip("Specify the cubemap HDRP uses to render the clouds.")]
+        public CubemapParameter         cloudMap            = new CubemapParameter(null);
         /// <summary>Enable Flowmap to have distorsion.</summary>
         [Tooltip("Enable or disable UV distortion.")]
         public BoolParameter            enableDistortion    = new BoolParameter(false);
@@ -83,7 +89,9 @@ namespace UnityEngine.Rendering.HighDefinition
             {
 #if UNITY_2019_3 // In 2019.3, when we call GetHashCode on a VolumeParameter it generate garbage (due to the boxing of the generic parameter)
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.value.GetHashCode() : hash;
+                hash = cloudMap.value != null ? hash * 23 + cloudMap.value.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.value.GetHashCode() : hash;
+                hash = hash * 23 + enableCloudLayer.value.GetHashCode();
                 hash = hash * 23 + enableDistortion.value.GetHashCode();
                 hash = hash * 23 + procedural.value.GetHashCode();
                 hash = hash * 23 + rotationDistortion.value.GetHashCode();
@@ -104,7 +112,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 hash = hash * 23 + rectLightShadow.value.GetHashCode();
 
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.overrideState.GetHashCode() : hash;
+                hash = cloudMap.value != null ? hash * 23 + cloudMap.overrideState.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.overrideState.GetHashCode() : hash;
+                hash = hash * 23 + enableCloudLayer.overrideState.GetHashCode();
                 hash = hash * 23 + enableDistortion.overrideState.GetHashCode();
                 hash = hash * 23 + procedural.overrideState.GetHashCode();
                 hash = hash * 23 + rotationDistortion.overrideState.GetHashCode();
@@ -125,7 +135,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 hash = hash * 23 + rectLightShadow.overrideState.GetHashCode();
 #else
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.GetHashCode() : hash;
+                hash = cloudMap.value != null ? hash * 23 + cloudMap.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.GetHashCode() : hash;
+                hash = hash * 23 + enableCloudLayer.GetHashCode();
                 hash = hash * 23 + enableDistortion.GetHashCode();
                 hash = hash * 23 + procedural.GetHashCode();
                 hash = hash * 23 + rotationDistortion.GetHashCode();

@@ -13,6 +13,8 @@ namespace UnityEditor.Rendering.HighDefinition
         SerializedDataParameter m_hdriSky;
         SerializedDataParameter m_UpperHemisphereLuxValue;
         SerializedDataParameter m_UpperHemisphereLuxColor;
+        SerializedDataParameter m_CloudLayer;
+        SerializedDataParameter m_CloudMap;
         SerializedDataParameter m_EnableDistortion;
         SerializedDataParameter m_Procedural;
         SerializedDataParameter m_Flowmap;
@@ -51,6 +53,9 @@ namespace UnityEditor.Rendering.HighDefinition
             m_hdriSky                   = Unpack(o.Find(x => x.hdriSky));
             m_UpperHemisphereLuxValue   = Unpack(o.Find(x => x.upperHemisphereLuxValue));
             m_UpperHemisphereLuxColor   = Unpack(o.Find(x => x.upperHemisphereLuxColor));
+
+            m_CloudLayer                = Unpack(o.Find(x => x.enableCloudLayer));
+            m_CloudMap                  = Unpack(o.Find(x => x.cloudMap));
 
             m_EnableDistortion          = Unpack(o.Find(x => x.enableDistortion));
             m_Procedural                = Unpack(o.Find(x => x.procedural));
@@ -127,6 +132,14 @@ namespace UnityEditor.Rendering.HighDefinition
             {
                 GetUpperHemisphereLuxValue();
                 updateDefaultShadowTint = true;
+            }
+
+            PropertyField(m_CloudLayer, new GUIContent("Cloud Layer"));
+            if (m_CloudLayer.value.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                PropertyField(m_CloudMap);
+                EditorGUI.indentLevel--;
             }
 
             PropertyField(m_EnableDistortion, new GUIContent("Distortion"));
