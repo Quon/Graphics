@@ -129,36 +129,52 @@ namespace UnityEngine.Rendering.HighDefinition
                     passID = m_RenderFullscreenSkyWithBackplateID;
             }
 
-            if (hdriSky.enableCloudLayer.value == true)
+            if (hdriSky.cloudLayerMode.value == CloudLayerMode.None)
             {
-                m_SkyHDRIMaterial.EnableKeyword("USE_CLOUDMAP");
-                m_SkyHDRIMaterial.SetTexture(HDShaderIDs._Cloudmap, hdriSky.cloudMap.value);
+                m_SkyHDRIMaterial.DisableKeyword("CLOUDMAP");
+                m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL_CLOUDS");
             }
             else
-                m_SkyHDRIMaterial.DisableKeyword("USE_CLOUDMAP");
-
-            if (hdriSky.enableDistortion.value == true)
             {
-                if (hdriSky.procedural.value == true)
+                if (hdriSky.cloudLayerMode.value == CloudLayerMode.Cubemap)
                 {
-                    m_SkyHDRIMaterial.DisableKeyword("USE_FLOWMAP");
-                    m_SkyHDRIMaterial.EnableKeyword("PROCEDURAL");
+                    m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL_CLOUDS");
+                    m_SkyHDRIMaterial.EnableKeyword("CLOUDMAP");
+                    m_SkyHDRIMaterial.SetTexture(HDShaderIDs._Cloudmap, hdriSky.cloudMap.value);
+                }
+                else if (hdriSky.cloudLayerMode.value == CloudLayerMode.Procedural)
+                {
+                    m_SkyHDRIMaterial.DisableKeyword("CLOUDMAP");
+                    m_SkyHDRIMaterial.EnableKeyword("PROCEDURAL_CLOUDS");
+                }
+
+                m_SkyHDRIMaterial.SetFloat(HDShaderIDs._Coverage, hdriSky.coverage.value);
+                m_SkyHDRIMaterial.SetFloat(HDShaderIDs._Opacity, hdriSky.opacity.value);
+                m_SkyHDRIMaterial.SetTexture(HDShaderIDs._Flowmap, hdriSky.flowmap.value);
+            }
+
+            if (hdriSky.enableWind.value == true)
+            {
+                if (hdriSky.enableFlowmap.value == true)
+                {
+                    m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL_WIND");
+                    m_SkyHDRIMaterial.EnableKeyword("FLOWMAP_WIND");
                 }
                 else
                 {
-                    m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL");
-                    m_SkyHDRIMaterial.EnableKeyword("USE_FLOWMAP");
-                    m_SkyHDRIMaterial.SetTexture(HDShaderIDs._Flowmap, hdriSky.flowmap.value);
+                    m_SkyHDRIMaterial.DisableKeyword("FLOWMAP_WIND");
+                    m_SkyHDRIMaterial.EnableKeyword("PROCEDURAL_WIND");
                 }
 
-                float rot = -Mathf.Deg2Rad*hdriSky.rotationDistortion.value;
-                Vector4 distortion = new Vector4(0.5f / hdriSky.loopTime.value, hdriSky.amplitude.value, Mathf.Cos(rot), Mathf.Sin(rot));
-                m_SkyHDRIMaterial.SetVector(HDShaderIDs._DistortionParam, distortion);
+                float rot = -Mathf.Deg2Rad*hdriSky.windDirection.value;
+                m_SkyHDRIMaterial.SetFloat(HDShaderIDs._WindForce, hdriSky.windForce.value);
+                m_SkyHDRIMaterial.SetFloat(HDShaderIDs._WindCos, Mathf.Cos(rot));
+                m_SkyHDRIMaterial.SetFloat(HDShaderIDs._WindSin, Mathf.Sin(rot));
             }
             else
             {
-                m_SkyHDRIMaterial.DisableKeyword("USE_FLOWMAP");
-                m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL");
+                m_SkyHDRIMaterial.DisableKeyword("FLOWMAP_WIND");
+                m_SkyHDRIMaterial.DisableKeyword("PROCEDURAL_WIND");
             }
 
             m_SkyHDRIMaterial.SetTexture(HDShaderIDs._Cubemap, hdriSky.hdriSky.value);

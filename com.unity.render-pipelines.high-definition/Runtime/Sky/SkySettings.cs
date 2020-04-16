@@ -39,6 +39,19 @@ namespace UnityEngine.Rendering.HighDefinition
     }
 
     /// <summary>
+    /// Cloud Layer Mode.
+    /// </summary>
+    public enum CloudLayerMode
+    {
+        /// <summary>No Cloud Layer.</summary>
+        None,
+        /// <summary>Use a cubemap.</summary>
+        Cubemap,
+        /// <summary>Procedural clouds.</summary>
+        Procedural,
+    }
+
+    /// <summary>
     /// Sky Intensity Mode.
     /// </summary>
     public enum SkyIntensityMode
@@ -80,6 +93,21 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <param name="overrideState">Initial override state.</param>
         public BackplateTypeParameter(BackplateType value, bool overrideState = false)
             : base(value, overrideState) { }
+    }
+
+    /// <summary>
+    /// Cloud Layer volume parameter.
+    /// </summary>
+    [Serializable, DebuggerDisplay(k_DebuggerDisplay)]
+    public sealed class CloudLayerParameter : VolumeParameter<CloudLayerMode>
+    {
+        /// <summary>
+        /// Cloud Layer volume parameter constructor.
+        /// </summary>
+        /// <param name="value">Cloud Layer parameter.</param>
+        /// <param name="overrideState">Initial override state.</param>
+        public CloudLayerParameter(CloudLayerMode value, bool overrideState = false)
+            : base(value, overrideState) {}
     }
 
     /// <summary>

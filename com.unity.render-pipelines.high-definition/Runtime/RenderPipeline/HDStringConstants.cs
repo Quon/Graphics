@@ -477,10 +477,8 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _ThicknessRemap = Shader.PropertyToID("_ThicknessRemap");
 
         public static readonly int _Cubemap = Shader.PropertyToID("_Cubemap");
-        public static readonly int _Cloudmap = Shader.PropertyToID("_Cloudmap");
         public static readonly int _Flowmap = Shader.PropertyToID("_Flowmap");
         public static readonly int _InvOmegaP = Shader.PropertyToID("_InvOmegaP");
-        public static readonly int _DistortionParam = Shader.PropertyToID("_DistortionParam");
         public static readonly int _SkyParam = Shader.PropertyToID("_SkyParam");
         public static readonly int _BackplateParameters0 = Shader.PropertyToID("_BackplateParameters0");
         public static readonly int _BackplateParameters1 = Shader.PropertyToID("_BackplateParameters1");
@@ -489,6 +487,12 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _BackplateShadowFilter = Shader.PropertyToID("_BackplateShadowFilter");
         public static readonly int _SkyIntensity = Shader.PropertyToID("_SkyIntensity");
         public static readonly int _PixelCoordToViewDirWS = Shader.PropertyToID("_PixelCoordToViewDirWS");
+        public static readonly int _Cloudmap = Shader.PropertyToID("_Cloudmap");
+        public static readonly int _Coverage = Shader.PropertyToID("_Coverage");
+        public static readonly int _Opacity = Shader.PropertyToID("_Opacity");
+        public static readonly int _WindForce = Shader.PropertyToID("_WindForce");
+        public static readonly int _WindCos = Shader.PropertyToID("_WindCos");
+        public static readonly int _WindSin = Shader.PropertyToID("_WindSin");
 
         public static readonly int _Size = Shader.PropertyToID("_Size");
         public static readonly int _Source = Shader.PropertyToID("_Source");

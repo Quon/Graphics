@@ -10,8 +10,8 @@ Shader "Hidden/HDRP/Sky/HDRISky"
 
     #define LIGHTLOOP_DISABLE_TILE_AND_CLUSTER
 
-    #pragma multi_compile_local _ USE_CLOUDMAP
-    #pragma multi_compile_local _ USE_FLOWMAP PROCEDURAL
+    #pragma multi_compile_local _ CLOUDMAP PROCEDURAL_CLOUDS
+    #pragma multi_compile_local _ FLOWMAP_WIND PROCEDURAL_WIND
 
     #pragma multi_compile _ DEBUG_DISPLAY
     #pragma multi_compile SHADOW_LOW SHADOW_MEDIUM SHADOW_HIGH
@@ -56,7 +56,6 @@ Shader "Hidden/HDRP/Sky/HDRISky"
     TEXTURECUBE(_Flowmap);
     SAMPLER(sampler_Flowmap);
 
-    float4 _DistortionParam; // x time, y amplitude, zw rotation (cosPhi and sinPhi)
     float4 _SkyParam; // x exposure, y multiplier, zw rotation (cosPhi and sinPhi)
     float4 _BackplateParameters0; // xy: scale, z: groundLevel, w: projectionDistance
     float4 _BackplateParameters1; // x: BackplateType, y: BlendAmount, zw: backplate rotation (cosPhi_plate, sinPhi_plate)
@@ -64,6 +63,12 @@ Shader "Hidden/HDRP/Sky/HDRISky"
     float3 _BackplateShadowTint;  // xyz: ShadowTint
     uint   _BackplateShadowFilter;
 
+    float _Coverage;
+    float _Opacity;
+    float _WindForce;
+    float _WindCos;
+    float _WindSin;
+    
     #define _Intensity          _SkyParam.x
     #define _CosPhi             _SkyParam.z
     #define _SinPhi             _SkyParam.w
@@ -86,9 +91,8 @@ Shader "Hidden/HDRP/Sky/HDRISky"
     #define _OffsetTex          _BackplateParameters2.zw
     #define _ShadowTint         _BackplateShadowTint.rgb
     #define _ShadowFilter       _BackplateShadowFilter
-    #define _FlowTime           _DistortionParam.x
-    #define _FlowAmplitude      _DistortionParam.y
-    #define _FlowCosSin         _DistortionParam.zw
+
+    #define WIND                defined(FLOWMAP_WIND) || defined(PROCEDURAL_WIND)
 
     struct Attributes
     {
@@ -184,11 +188,10 @@ Shader "Hidden/HDRP/Sky/HDRISky"
         return IsHit(sdf, dir.y);
     }
 
+// Cloud layer utilities
     float2 GetFlow(float3 dir)
     {
-        dir = RotationUp(dir, _FlowCosSin);
-
-#ifdef USE_FLOWMAP
+#ifdef FLOWMAP_WIND
         return SAMPLE_TEXTURECUBE_LOD(_Flowmap, sampler_Flowmap, dir, 0).rg * 2.0 - 1.0;
 #else
         // source: https://www.gdcvault.com/play/1020146/Moving-the-Heavens-An-Artistic
@@ -197,55 +200,144 @@ Shader "Hidden/HDRP/Sky/HDRISky"
 #endif
     }
 
-    float remap(float x, float treshold = 0.5)
-    {
-        return max(x - treshold, 0) / (1-treshold);
-    }
-
     float3 sampleCloud(float3 dir, float3 skyColor)
     {
+#if CLOUDMAP
         float4 cloud = SAMPLE_TEXTURECUBE_LOD(_Cloudmap, sampler_Cloudmap, dir, 0);
-        return lerp(skyColor, cloud.rgb, remap(cloud.a));
+        return lerp(skyColor, cloud.rgb, cloud.a);
+#else
+        return SAMPLE_TEXTURECUBE_LOD(_Cubemap, sampler_Cubemap, dir, 0).rgb;
+#endif
     }
+
+    float random(float2 uv)
+    {
+        return frac(sin(dot(uv.xy, float2(12.9898,78.233))) * 43758.5453);
+    }
+
+    float simpleNoiseValue(float2 uv)
+    {
+        float2 i = floor(uv);
+        float2 f = frac(uv);
+        f = f * f * (3. - 2. * f);
+
+        float lb = random(i + float2(0., 0.));
+        float rb = random(i + float2(1., 0.));
+        float lt = random(i + float2(0., 1.));
+        float rt = random(i + float2(1., 1.));
+
+        return lerp(lerp(lb, rb, f.x), 
+                lerp(lt, rt, f.x), f.y);
+    }
+    
+    float simpleNoise(float2 UV, float Scale)
+    {
+        float t = 0.0;
+    
+        float freq = pow(2.0, float(0));
+        float amp = pow(0.5, float(3-0));
+        t += simpleNoiseValue(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+    
+        freq = pow(2.0, float(1));
+        amp = pow(0.5, float(3-1));
+        t += simpleNoiseValue(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+    
+        freq = pow(2.0, float(2));
+        amp = pow(0.5, float(3-2));
+        t += simpleNoiseValue(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+    
+        return t;
+    }
+    
+    float2 gradientNoiseValue(float2 p)
+    {
+        // Permutation and hashing used in webgl-nosie goo.gl/pX7HtC
+        p = p % 289;
+        float x = (34 * p.x + 1) * p.x % 289 + p.y;
+        x = (34 * x + 1) * x % 289;
+        x = frac(x / 41) * 2 - 1;
+        return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
+    }
+    
+    float gradientNoise(float2 UV, float Scale)
+    { 
+        float2 p = UV * Scale;
+        float2 ip = floor(p);
+        float2 fp = frac(p);
+        float d00 = dot(gradientNoiseValue(ip), fp);
+        float d01 = dot(gradientNoiseValue(ip + float2(0, 1)), fp - float2(0, 1));
+        float d10 = dot(gradientNoiseValue(ip + float2(1, 0)), fp - float2(1, 0));
+        float d11 = dot(gradientNoiseValue(ip + float2(1, 1)), fp - float2(1, 1));
+        fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
+        return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
+    }
+    
+    float saturation(float3 In)
+    {
+        return dot(In, float3(0.2126729, 0.7151522, 0.0721750));
+    }
+// End of cloud layer utilities
 
     float3 GetSkyColor(float3 dir)
     {
-        float3 color = SAMPLE_TEXTURECUBE_LOD(_Cubemap, sampler_Cubemap, dir, 0).rgb;
+        float3 sky = SAMPLE_TEXTURECUBE_LOD(_Cubemap, sampler_Cubemap, dir, 0).rgb;
 
-#if defined(USE_FLOWMAP) || defined(PROCEDURAL)
-        // Compute distortion directions on the cube
+#if WIND
+        float3 windDir = RotationUp(dir, float2(_WindCos, _WindSin));
+#else
+        float3 windDir = dir;
+#endif
+        
+#if PROCEDURAL_CLOUDS
+        if (dir.y < 0) return sky;
+
+        float2 uv = 1.2*windDir.xz / dir.y;
+        float2 uv1 = uv, uv2 = uv;
+
+    #if WIND
+        uv1.x += _WindForce * _Time.y * 0.01;
+        uv2.x -= 0.05 * _Time.y;
+    #endif
+        
+        float noise1 = simpleNoise(uv1, 5);
+        float noise2 = simpleNoise(uv1, 33) + gradientNoise(uv2, 0.5);
+        
+        float4 falloffs = float4(0, 20, 1.0-_Coverage, 1.0);
+        float a = smoothstep(falloffs.x, falloffs.y, noise1);
+        float b = smoothstep(falloffs.z, falloffs.w, noise2 * 0.5);
+        float clouds = saturation(a * b) + (240.0 - 200.0 * _Coverage)*_Opacity;
+        return lerp(sky, clouds, a * b * dir.y * 50.0);
+#elif WIND
         float3 tangent = cross(dir, float3(0.0, 1.0, 0.0));
         float3 bitangent = cross(tangent, dir);
 
         // Compute flow factor
-        float2 flow = GetFlow(dir);
+        float2 flow = GetFlow(windDir);
 
-        float time = _Time.y * _FlowTime;
+        float time = _Time.y * _WindForce * 0.01;
         float2 alpha = frac(float2(time, time + 0.5)) - 0.5;
 
-        float2 uv1 = alpha.x * _FlowAmplitude * flow;
-        float2 uv2 = alpha.y * _FlowAmplitude * flow;
+        float2 uv1 = alpha.x * flow;
+        float2 uv2 = alpha.y * flow;
 
         float3 dir1 = dir + uv1.x * tangent + uv1.y * bitangent;
         float3 dir2 = dir + uv2.x * tangent + uv2.y * bitangent;
+        dir2.x *= -1;
+        dir2.z *= -1;
 
         // Sample twice
-        #ifdef USE_CLOUDMAP
-            float3 color1 = sampleCloud(dir1, color);
-            float3 color2 = sampleCloud(dir2, color);
-        #else
-            float3 color1 = SAMPLE_TEXTURECUBE_LOD(_Cubemap, sampler_Cubemap, dir1, 0).rgb;
-            float3 color2 = SAMPLE_TEXTURECUBE_LOD(_Cubemap, sampler_Cubemap, dir2, 0).rgb;
-        #endif
+        float3 color1 = sampleCloud(dir1, sky);
+        float3 color2 = sampleCloud(dir2, sky);
 
         // Blend color samples
-        color = lerp(color1, color2, abs(2.0 * alpha.x));
-
-#elif USE_CLOUDMAP
-        color = sampleCloud(dir, color);
+        return lerp(color1, color2, abs(2.0 * alpha.x));
+#elif CLOUDMAP
+        float4 clouds = SAMPLE_TEXTURECUBE_LOD(_Cloudmap, sampler_Cloudmap, dir, 0);
+        return lerp(sky, clouds.rgb, clouds.a);
+#else
+        return sky;
 #endif
-
-        return color;
+    
     }
 
     float4 GetColorWithRotation(float3 dir, float exposure, float2 cos_sin)

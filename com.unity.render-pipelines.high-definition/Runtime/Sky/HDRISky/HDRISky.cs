@@ -13,30 +13,31 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <summary>Cubemap used to render the HDRI sky.</summary>
         [Tooltip("Specify the cubemap HDRP uses to render the sky.")]
         public CubemapParameter         hdriSky             = new CubemapParameter(null);
+
+
         /// <summary>Enable to have a cloud layer on top of the sky.</summary>
         [Tooltip("Enable to have a cloud layer on top of the sky.")]
-        public BoolParameter            enableCloudLayer    = new BoolParameter(false);
+        public CloudLayerParameter      cloudLayerMode      = new CloudLayerParameter(CloudLayerMode.None);
         /// <summary>Cubemap used to render the clouds.</summary>
         [Tooltip("Specify the cubemap HDRP uses to render the clouds.")]
         public CubemapParameter         cloudMap            = new CubemapParameter(null);
+        public ClampedFloatParameter    coverage            = new ClampedFloatParameter(0.7f, 0.0f, 1.0f);
+        public ClampedFloatParameter    opacity             = new ClampedFloatParameter(0.4f, 0.0f, 1.0f);
+
+
         /// <summary>Enable Flowmap to have distorsion.</summary>
         [Tooltip("Enable or disable UV distortion.")]
-        public BoolParameter            enableDistortion    = new BoolParameter(false);
-        /// <summary>Enable Flowmap to have distorsion.</summary>
-        [Tooltip("Enable or disable procedural distorsion.")]
-        public BoolParameter            procedural          = new BoolParameter(true);
+        public BoolParameter            enableWind          = new BoolParameter(false);
+        public BoolParameter            enableFlowmap       = new BoolParameter(false);
         /// <summary>Cubemap used to distort the uv for the HDRI sky.</summary>
         [Tooltip("Specify the cubemap HDRP uses for UV distortion.")]
         public CubemapParameter         flowmap             = new CubemapParameter(null);
         /// <summary>Rotation of the distortion.</summary>
         [Tooltip("Sets the rotation of the distortion.")]
-        public ClampedFloatParameter    rotationDistortion  = new ClampedFloatParameter(0.0f, 0.0f, 360.0f);
-        /// <summary>Time to do a full loop.</summary>
-        [Tooltip("Time in seconds to loop animation.")]
-        public FloatParameter           loopTime            = new FloatParameter(1.0f);
-        /// <summary>Multiplier for HDRI sky uv distortion.</summary>
-        [Tooltip("Amplitude of the distorsion.")]
-        public FloatParameter           amplitude           = new FloatParameter(1.0f);
+        public ClampedFloatParameter    windDirection       = new ClampedFloatParameter(0.0f, 0.0f, 360.0f);
+        public MinFloatParameter        windForce           = new MinFloatParameter(2.0f, 0.0f);
+
+
         /// <summary>Enable Backplate to have it visible.</summary>
         [Tooltip("Enable or disable the backplate.")]
         public BoolParameter            enableBackplate     = new BoolParameter(false);
@@ -91,12 +92,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.value.GetHashCode() : hash;
                 hash = cloudMap.value != null ? hash * 23 + cloudMap.value.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.value.GetHashCode() : hash;
-                hash = hash * 23 + enableCloudLayer.value.GetHashCode();
                 hash = hash * 23 + enableDistortion.value.GetHashCode();
-                hash = hash * 23 + procedural.value.GetHashCode();
                 hash = hash * 23 + rotationDistortion.value.GetHashCode();
-                hash = hash * 23 + loopTime.value.GetHashCode();
-                hash = hash * 23 + amplitude.value.GetHashCode();
+                hash = hash * 23 + coverage.value.GetHashCode();
                 hash = hash * 23 + enableBackplate.value.GetHashCode();
                 hash = hash * 23 + backplateType.value.GetHashCode();
                 hash = hash * 23 + groundLevel.value.GetHashCode();
@@ -114,12 +112,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.overrideState.GetHashCode() : hash;
                 hash = cloudMap.value != null ? hash * 23 + cloudMap.overrideState.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.overrideState.GetHashCode() : hash;
-                hash = hash * 23 + enableCloudLayer.overrideState.GetHashCode();
                 hash = hash * 23 + enableDistortion.overrideState.GetHashCode();
-                hash = hash * 23 + procedural.overrideState.GetHashCode();
                 hash = hash * 23 + rotationDistortion.overrideState.GetHashCode();
-                hash = hash * 23 + loopTime.overrideState.GetHashCode();
-                hash = hash * 23 + amplitude.overrideState.GetHashCode();
+                hash = hash * 23 + coverage.overrideState.GetHashCode();
                 hash = hash * 23 + enableBackplate.overrideState.GetHashCode();
                 hash = hash * 23 + backplateType.overrideState.GetHashCode();
                 hash = hash * 23 + groundLevel.overrideState.GetHashCode();
@@ -137,12 +132,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 hash = hdriSky.value != null ? hash * 23 + hdriSky.GetHashCode() : hash;
                 hash = cloudMap.value != null ? hash * 23 + cloudMap.GetHashCode() : hash;
                 hash = flowmap.value != null ? hash * 23 + flowmap.GetHashCode() : hash;
-                hash = hash * 23 + enableCloudLayer.GetHashCode();
-                hash = hash * 23 + enableDistortion.GetHashCode();
-                hash = hash * 23 + procedural.GetHashCode();
-                hash = hash * 23 + rotationDistortion.GetHashCode();
-                hash = hash * 23 + loopTime.GetHashCode();
-                hash = hash * 23 + amplitude.GetHashCode();
+                hash = hash * 23 + enableWind.GetHashCode();
+                hash = hash * 23 + windDirection.GetHashCode();
+                hash = hash * 23 + coverage.GetHashCode();
                 hash = hash * 23 + enableBackplate.GetHashCode();
                 hash = hash * 23 + backplateType.GetHashCode();
                 hash = hash * 23 + groundLevel.GetHashCode();

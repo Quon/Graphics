@@ -13,14 +13,18 @@ namespace UnityEditor.Rendering.HighDefinition
         SerializedDataParameter m_hdriSky;
         SerializedDataParameter m_UpperHemisphereLuxValue;
         SerializedDataParameter m_UpperHemisphereLuxColor;
-        SerializedDataParameter m_CloudLayer;
+
+        SerializedDataParameter m_CloudLayerMode;
         SerializedDataParameter m_CloudMap;
-        SerializedDataParameter m_EnableDistortion;
-        SerializedDataParameter m_Procedural;
+        SerializedDataParameter m_Coverage;
+        SerializedDataParameter m_Opacity;
+
+        SerializedDataParameter m_EnableWind;
+        SerializedDataParameter m_EnableFlowmap;
         SerializedDataParameter m_Flowmap;
-        SerializedDataParameter m_RotationDistortion;
-        SerializedDataParameter m_LoopTime;
-        SerializedDataParameter m_Amplitude;
+        SerializedDataParameter m_WindDirection;
+        SerializedDataParameter m_WindForce;
+
         SerializedDataParameter m_EnableBackplate;
         SerializedDataParameter m_BackplateType;
         SerializedDataParameter m_GroundLevel;
@@ -34,6 +38,9 @@ namespace UnityEditor.Rendering.HighDefinition
         SerializedDataParameter m_DirLightShadow;
         SerializedDataParameter m_RectLightShadow;
         SerializedDataParameter m_ShadowTint;
+
+        GUIContent[]    m_IntensityModes = { new GUIContent("None"), new GUIContent("Cubemap"), new GUIContent("Procedural") };
+        int[]           m_IntensityModeValues = { (int)CloudLayerMode.None, (int)CloudLayerMode.Cubemap, (int)CloudLayerMode.Procedural };
 
         RTHandle m_IntensityTexture;
         Material m_IntegrateHDRISkyMaterial; // Compute the HDRI sky intensity in lux for the skybox
@@ -54,15 +61,16 @@ namespace UnityEditor.Rendering.HighDefinition
             m_UpperHemisphereLuxValue   = Unpack(o.Find(x => x.upperHemisphereLuxValue));
             m_UpperHemisphereLuxColor   = Unpack(o.Find(x => x.upperHemisphereLuxColor));
 
-            m_CloudLayer                = Unpack(o.Find(x => x.enableCloudLayer));
+            m_CloudLayerMode            = Unpack(o.Find(x => x.cloudLayerMode));
             m_CloudMap                  = Unpack(o.Find(x => x.cloudMap));
+            m_Coverage                  = Unpack(o.Find(x => x.coverage));
+            m_Opacity                   = Unpack(o.Find(x => x.opacity));
 
-            m_EnableDistortion          = Unpack(o.Find(x => x.enableDistortion));
-            m_Procedural                = Unpack(o.Find(x => x.procedural));
+            m_EnableWind                = Unpack(o.Find(x => x.enableWind));
+            m_EnableFlowmap             = Unpack(o.Find(x => x.enableFlowmap));
             m_Flowmap                   = Unpack(o.Find(x => x.flowmap));
-            m_RotationDistortion        = Unpack(o.Find(x => x.rotationDistortion));
-            m_LoopTime                  = Unpack(o.Find(x => x.loopTime));
-            m_Amplitude                 = Unpack(o.Find(x => x.amplitude));
+            m_WindDirection             = Unpack(o.Find(x => x.windDirection));
+            m_WindForce                 = Unpack(o.Find(x => x.windForce));
 
             m_EnableBackplate           = Unpack(o.Find(x => x.enableBackplate));
             m_BackplateType             = Unpack(o.Find(x => x.backplateType));
@@ -134,30 +142,46 @@ namespace UnityEditor.Rendering.HighDefinition
                 updateDefaultShadowTint = true;
             }
 
-            PropertyField(m_CloudLayer, new GUIContent("Cloud Layer"));
-            if (m_CloudLayer.value.boolValue)
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                DrawOverrideCheckbox(m_CloudLayerMode);
+                using (new EditorGUI.DisabledScope(!m_CloudLayerMode.overrideState.boolValue))
+                    m_CloudLayerMode.value.intValue = EditorGUILayout.IntPopup(new GUIContent("Cloud Layer"), (int)m_CloudLayerMode.value.intValue, m_IntensityModes, m_IntensityModeValues);
+            }
+            if (m_CloudLayerMode.value.intValue == (int)CloudLayerMode.Cubemap)
             {
                 EditorGUI.indentLevel++;
                 PropertyField(m_CloudMap);
                 EditorGUI.indentLevel--;
             }
-
-            PropertyField(m_EnableDistortion, new GUIContent("Distortion"));
-            if (m_EnableDistortion.value.boolValue)
+            else if (m_CloudLayerMode.value.intValue == (int)CloudLayerMode.Procedural)
             {
                 EditorGUI.indentLevel++;
-                PropertyField(m_Procedural, new GUIContent("Procedural"));
-                if (!m_Procedural.value.boolValue)
-                {
-                    EditorGUI.indentLevel++;
-                    PropertyField(m_Flowmap);
-                    EditorGUI.indentLevel--;
-                }
-                PropertyField(m_RotationDistortion, new GUIContent("Distortion Rotation"));
-                PropertyField(m_LoopTime);
-                PropertyField(m_Amplitude);
+                PropertyField(m_Coverage);
+                PropertyField(m_Opacity);
                 EditorGUI.indentLevel--;
             }
+
+            PropertyField(m_EnableWind, new GUIContent("Wind"));
+            if (m_EnableWind.value.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                if (m_CloudLayerMode.value.intValue != (int)CloudLayerMode.Procedural)
+                {
+                    PropertyField(m_EnableFlowmap);
+                    if (m_EnableFlowmap.value.boolValue)
+                    {
+                        EditorGUI.indentLevel++;
+                        PropertyField(m_Flowmap);
+                        EditorGUI.indentLevel--;
+                    }
+                }
+
+                PropertyField(m_WindDirection, new GUIContent("Direction"));
+                PropertyField(m_WindForce, new GUIContent("Force"));
+                EditorGUI.indentLevel--;
+            }
+
             base.CommonSkySettingsGUI();
 
             if (isInAdvancedMode)
