@@ -5,11 +5,11 @@ using UnityEditor.Rendering;
 namespace UnityEngine.Rendering.HighDefinition
 {
     [UnityEditor.Experimental.AssetImporters.ScriptedImporter(1, "ies")]
-    public class IesImporter : UnityEditor.Rendering.IesImporter
+    public class HDIESImporter : UnityEditor.Rendering.IesImporter
     {
         protected override UnityEditor.Rendering.IesEngine CreateEngine()
         {
-            UnityEngine.Rendering.HighDefinition.IesEngine iesEngine = new UnityEngine.Rendering.HighDefinition.IesEngine();
+            HDIESImporter iesEngine = new HDIESImporter();
             return iesEngine as UnityEditor.Rendering.IesEngine;
         }
 

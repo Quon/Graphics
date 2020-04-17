@@ -6,7 +6,7 @@ using UnityEditor.Experimental.AssetImporters;
 namespace UnityEngine.Rendering.HighDefinition
 {
     [CustomEditor(typeof(IesImporter))]
-    public class IesImporterEditor : UnityEditor.Rendering.IesImporterEditor
+    public class HDIESImporterEditor : UnityEditor.Rendering.IesImporterEditor
     {
         override public void LayoutRenderPipelineUseIesMaximumIntensity()
         {

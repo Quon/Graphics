@@ -8,10 +8,8 @@ namespace UnityEngine.Rendering.HighDefinition
     // Photometric type coordinate system references:
     // https://www.ies.org/product/approved-method-guide-to-goniometer-measurements-and-types-and-photometric-coordinate-systems/
     // https://support.agi32.com/support/solutions/articles/22000209748-type-a-type-b-and-type-c-photometry
-    public class IesEngine : UnityEditor.Rendering.IesEngine
+    public class HDIESEngine : UnityEditor.Rendering.IesEngine
     {
-        const float k_HalfPi = 0.5f*Mathf.PI;
-        const float k_TwoPi  = 2.0f*Mathf.PI;
 
         // k_MinTextureSize should be 32, but using a larger value to minimize Unity's issue with cubemap cookies made from low-resolution latitude-longitude images.
         // When used, such a cubemap cookie North-South axis is visually tilted compared to its point light Y axis.
