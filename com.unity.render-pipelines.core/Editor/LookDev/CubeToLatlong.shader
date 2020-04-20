@@ -45,11 +45,7 @@ Shader "Hidden/LookDev/CubeToLatlong"
 
     float4 frag(    float2 texcoord : TEXCOORD0,
                     UNITY_VPOS_TYPE vpos : VPOS
-<<<<<<< HEAD
                     ) : SV_Target
-=======
-                    ) : COLOR
->>>>>>> oldSRP/HDRP/ies_lights
     {
         float2 texCoord = texcoord.xy;
         float theta = texCoord.y * UNITY_PI;
