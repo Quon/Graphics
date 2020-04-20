@@ -26,11 +26,7 @@ namespace UnityEngine.Rendering.HighDefinition
         internal const int k_MinCookieSize = 2;
 
         readonly Material m_MaterialFilterAreaLights;
-<<<<<<< HEAD
         MaterialPropertyBlock m_MPBFilterAreaLights = new MaterialPropertyBlock();
-=======
-        MaterialPropertyBlock m_MPBFilterAreaLights;
->>>>>>> oldSRP/HDRP/ies_lights
 
         readonly Material m_CubeToPanoMaterial;
 
@@ -40,12 +36,6 @@ namespace UnityEngine.Rendering.HighDefinition
         // Structure for cookies used by directional and spotlights
         PowerOfTwoTextureAtlas m_CookieAtlas;
 
-<<<<<<< HEAD
-=======
-        MaterialPropertyBlock m_LatLongBlock = null;
-        System.Collections.Generic.Dictionary<int, RTHandle> m_LatLongCache = null;
-
->>>>>>> oldSRP/HDRP/ies_lights
         // Structure for cookies used by point lights
         TextureCacheCubemap m_CubeCookieTexArray;
         // During the light loop, when reserving space for the cookies (first part of the light loop) the atlas
@@ -78,14 +68,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             m_CookieAtlas = new PowerOfTwoTextureAtlas(cookieAtlasSize, gLightLoopSettings.cookieAtlasLastValidMip, cookieFormat, name: "Cookie Atlas (Punctual Lights)", useMipMap: true);
 
-<<<<<<< HEAD
             m_CubeToPanoMaterial = CoreUtils.CreateEngineMaterial(hdResources.shaders.cubeToPanoPS);
-=======
-            m_LatLongCache = new System.Collections.Generic.Dictionary<int, RTHandle>(4);
-
-            m_CubeToPanoMaterial = CoreUtils.CreateEngineMaterial(hdResources.shaders.cubeToPanoPS);
-            m_LatLongBlock = new MaterialPropertyBlock();
->>>>>>> oldSRP/HDRP/ies_lights
 
             m_CubeCookieTexArray = new TextureCacheCubemap("Cookie");
             int cookieCubeResolution = (int)gLightLoopSettings.pointCookieSize;
@@ -109,18 +92,7 @@ namespace UnityEngine.Rendering.HighDefinition
             CoreUtils.Destroy(m_MaterialFilterAreaLights);
             CoreUtils.Destroy(m_CubeToPanoMaterial);
 
-<<<<<<< HEAD
             if(m_TempRenderTexture0 != null)
-=======
-            foreach (var cur in m_LatLongCache)
-            {
-                cur.Value.Release();
-            }
-            m_LatLongCache.Clear();
-            m_LatLongCache = null;
-
-            if (m_TempRenderTexture0 != null)
->>>>>>> oldSRP/HDRP/ies_lights
             {
                 m_TempRenderTexture0.Release();
                 m_TempRenderTexture0 = null;
@@ -187,20 +159,12 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 // Start by copying the source texture to the array slice's mip 0
                 {
-<<<<<<< HEAD
                     m_MPBFilterAreaLights.SetInt(s_sourceMipLevel, 0);
                     m_MPBFilterAreaLights.SetTexture(s_texSource, source);
 
                     cmd.SetRenderTarget(m_TempRenderTexture0, 0);
                     cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
                     cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 0, MeshTopology.Triangles, 3, 1, m_MPBFilterAreaLights);
-=======
-                    cmd.SetGlobalTexture(s_texSource, source);
-                    cmd.SetGlobalInt(s_sourceMipLevel, 0);
-                    cmd.SetRenderTarget(m_TempRenderTexture0, 0);
-                    cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
-                    cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 0, MeshTopology.Triangles, 3, 1);
->>>>>>> oldSRP/HDRP/ies_lights
                 }
 
                 // Then operate on all the remaining mip levels
@@ -214,7 +178,6 @@ namespace UnityEngine.Rendering.HighDefinition
                         viewportWidth = Mathf.Max(1, viewportWidth >> 1);
                         targetWidth = Mathf.Max(1, targetWidth  >> 1);
 
-<<<<<<< HEAD
                         m_MPBFilterAreaLights.SetTexture(s_texSource, m_TempRenderTexture0);
                         m_MPBFilterAreaLights.SetInt(s_sourceMipLevel, mipIndex - 1);
                         m_MPBFilterAreaLights.SetVector(s_sourceSize, sourceSize);
@@ -223,15 +186,6 @@ namespace UnityEngine.Rendering.HighDefinition
                         cmd.SetRenderTarget(m_TempRenderTexture1, mipIndex-1);    // Temp texture is already 1 mip lower than source
                         cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
                         cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 1, MeshTopology.Triangles, 3, 1, m_MPBFilterAreaLights);
-=======
-                        cmd.SetRenderTarget(m_TempRenderTexture1, mipIndex-1);    // Temp texture is already 1 mip lower than source
-                        cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
-                        cmd.SetGlobalTexture(s_texSource, m_TempRenderTexture0);
-                        cmd.SetGlobalInt(s_sourceMipLevel, mipIndex-1);          // Use previous mip as source
-                        cmd.SetGlobalVector(s_sourceSize, sourceSize);
-                        cmd.SetGlobalVector(s_uvLimits, uvLimits);
-                        cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 1, MeshTopology.Triangles, 3, 1);
->>>>>>> oldSRP/HDRP/ies_lights
                     }
 
                     sourceWidth = targetWidth;
@@ -243,7 +197,6 @@ namespace UnityEngine.Rendering.HighDefinition
                         viewportHeight = Mathf.Max(1, viewportHeight >> 1);
                         targetHeight = Mathf.Max(1, targetHeight >> 1);
 
-<<<<<<< HEAD
                         m_MPBFilterAreaLights.SetTexture(s_texSource, m_TempRenderTexture1);
                         m_MPBFilterAreaLights.SetInt(s_sourceMipLevel, mipIndex - 1);
                         m_MPBFilterAreaLights.SetVector(s_sourceSize, sourceSize);
@@ -252,15 +205,6 @@ namespace UnityEngine.Rendering.HighDefinition
                         cmd.SetRenderTarget(m_TempRenderTexture0, mipIndex);
                         cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
                         cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 2, MeshTopology.Triangles, 3, 1, m_MPBFilterAreaLights);
-=======
-                        cmd.SetRenderTarget(m_TempRenderTexture0, mipIndex);
-                        cmd.SetViewport(new Rect(0, 0, viewportWidth, viewportHeight));
-                        cmd.SetGlobalTexture(s_texSource, m_TempRenderTexture1);
-                        cmd.SetGlobalInt(s_sourceMipLevel, mipIndex-1);
-                        cmd.SetGlobalVector(s_sourceSize, sourceSize);
-                        cmd.SetGlobalVector(s_uvLimits, uvLimits);
-                        cmd.DrawProcedural(Matrix4x4.identity, m_MaterialFilterAreaLights, 2, MeshTopology.Triangles, 3, 1);
->>>>>>> oldSRP/HDRP/ies_lights
                     }
 
                     sourceHeight = targetHeight;
@@ -270,84 +214,6 @@ namespace UnityEngine.Rendering.HighDefinition
             return m_TempRenderTexture0;
         }
 
-<<<<<<< HEAD
-=======
-        //static private void DefaultDumper(AsyncGPUReadbackRequest request, string name, Experimental.Rendering.GraphicsFormat gfxFormat)
-        //{
-        //    if (!request.hasError)
-        //    {
-        //        Unity.Collections.NativeArray<float> result = request.GetData<float>();
-        //        float[] copy = new float[result.Length];
-        //        result.CopyTo(copy);
-        //        byte[] bytes0 = ImageConversion.EncodeArrayToEXR(
-        //                                            copy,
-        //                                            format: gfxFormat,
-        //                                            (uint)request.width, (uint)request.height, 0,
-        //                                            Texture2D.EXRFlags.CompressZIP);
-        //        string path = @"C:\UProjects\" + name + ".exr";
-        //        if (System.IO.File.Exists(path))
-        //        {
-        //            System.IO.File.SetAttributes(path, System.IO.FileAttributes.Normal);
-        //            System.IO.File.Delete(path);
-        //        }
-        //        System.IO.File.WriteAllBytes(path, bytes0);
-        //    }
-        //}
-
-        Texture FlattenCubemapTexture(CommandBuffer cmd, Texture source)
-        {
-            if (m_MaterialFilterAreaLights == null)
-            {
-                Debug.LogError("SKCode: FlattenCubemapTexture has an invalid shader. Can't flatten cubemap cookie.");
-                return null;
-            }
-
-            RTHandle tempRTHandle;
-            int ID = source.GetInstanceID();
-            if (m_LatLongCache.TryGetValue(ID, out tempRTHandle))
-            {
-                return tempRTHandle;
-            }
-            else
-            {
-                // TODO: we don't need to allocate two temp RT, we can use the atlas as temp render texture
-                // it will avoid additional copy of the whole mip chain into the atlas.
-                int viewportWidth   = 2*source.width;
-                int viewportHeight  = 2*source.width;
-
-                tempRTHandle = RTHandles.Alloc( viewportWidth,
-                                                viewportHeight,
-                                                colorFormat: GraphicsFormat.B10G11R11_UFloatPack32,
-                                                enableRandomWrite: true,
-                                                useMipMap: true,
-                                                autoGenerateMips: false);
-                RTHandleDeleter.ScheduleRelease(tempRTHandle/*, 128*/);
-
-                Debug.Assert(source.dimension == TextureDimension.Cube);
-
-                Cubemap cubemap = source as Cubemap;
-
-                m_LatLongBlock.SetTexture("_srcCubeTexture",             cubemap);
-                m_LatLongBlock.SetInt    ("_cubeMipLvl",                 0);
-                m_LatLongBlock.SetInt    ("_cubeArrayIndex",             0);
-                m_LatLongBlock.SetInt    ("_buildPDF",                   0);
-                m_LatLongBlock.SetInt    ("_preMultiplyBySolidAngle",    0);
-                m_LatLongBlock.SetInt    ("_preMultiplyByCosTheta",      0);
-                m_LatLongBlock.SetInt    ("_preMultiplyByJacobian",      0);
-                m_LatLongBlock.SetVector ("_Sizes", new Vector4((float)viewportWidth, (float)viewportHeight, 1.0f/(float)viewportWidth, 1.0f/(float)viewportHeight));
-                cmd.SetViewport(new Rect(0.0f, 0.0f, viewportWidth, viewportHeight));
-                CoreUtils.SetRenderTarget(cmd, tempRTHandle);
-                cmd.DrawProcedural(Matrix4x4.identity, m_CubeToPanoMaterial, 0, MeshTopology.Triangles, 3, 1, m_LatLongBlock);
-
-                RTHandle tempRTHandle2 = RTHandles.Alloc(FilterAreaLightTexture(cmd, tempRTHandle));
-
-                m_LatLongCache.Add(ID, tempRTHandle2);
-
-                return tempRTHandle2;
-            }
-        }
-
->>>>>>> oldSRP/HDRP/ies_lights
         public void LayoutIfNeeded()
         {
             if (!m_2DCookieAtlasNeedsLayouting)
@@ -386,44 +252,13 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 // Generate the mips
                 Texture filteredAreaLight = FilterAreaLightTexture(cmd, cookie);
-<<<<<<< HEAD
                 Vector4 sourceScaleOffset = new Vector4(cookie.width / (float)atlasTexture.rt.width, cookie.height / (float)atlasTexture.rt.height, 0, 0);
-=======
-                Vector4 sourceScaleOffset = new Vector4(cookie.width/(float)atlasTexture.rt.width, cookie.height/(float)atlasTexture.rt.height, 0, 0);
->>>>>>> oldSRP/HDRP/ies_lights
                 m_CookieAtlas.BlitTexture(cmd, scaleBias, filteredAreaLight, sourceScaleOffset, blitMips: true, overrideInstanceID: cookie.GetInstanceID());
             }
 
             return scaleBias;
         }
 
-<<<<<<< HEAD
-=======
-        public Vector4 FetchCubeCookieFlatten(CommandBuffer cmd, Texture cookie)
-        {
-            int finalSize = 2*cookie.width;
-
-            Debug.Assert(cookie.dimension == TextureDimension.Cube);
-
-            if (finalSize < k_MinCookieSize)
-                return Vector4.zero;
-
-            Texture flattenCubemap = FlattenCubemapTexture(cmd, cookie);
-            if (!m_CookieAtlas.IsCached(out var scaleBias, cookie) && !m_NoMoreSpace)
-                Debug.LogError($"SKCode: Area Light cookie texture {cookie} can't be fetched without having reserved. You can try to increase the cookie atlas resolution in the HDRP settings.");
-
-            if (m_CookieAtlas.NeedsUpdate(cookie, true))
-            {
-                // Generate the mips
-                float size = 2.0f*cookie.width;
-                Vector4 sourceScaleOffset = new Vector4(size/(float)atlasTexture.rt.width, size/(float)atlasTexture.rt.height, 0, 0);
-                m_CookieAtlas.BlitTexture(cmd, scaleBias, flattenCubemap, sourceScaleOffset, blitMips: true, overrideInstanceID: cookie.GetInstanceID());
-            }
-
-            return scaleBias;
-        }
-
->>>>>>> oldSRP/HDRP/ies_lights
         public void ReserveSpace(Texture cookie)
         {
             if (cookie == null)
@@ -436,24 +271,6 @@ namespace UnityEngine.Rendering.HighDefinition
                 m_2DCookieAtlasNeedsLayouting = true;
         }
 
-<<<<<<< HEAD
-=======
-        public void ReserveSpaceCubemap(Texture cookie)
-        {
-            if (cookie == null)
-                return;
-
-            int width  = 2*cookie.width;
-            int height = 2*cookie.width;
-
-            if (width < k_MinCookieSize || height < k_MinCookieSize)
-                return;
-
-            if (!m_CookieAtlas.ReserveSpace(cookie.GetInstanceID(), width, height))
-                m_2DCookieAtlasNeedsLayouting = true;
-        }
-
->>>>>>> oldSRP/HDRP/ies_lights
         public int FetchCubeCookie(CommandBuffer cmd, Texture cookie) => m_CubeCookieTexArray.FetchSlice(cmd, cookie);
 
         public void ResetAllocator() => m_CookieAtlas.ResetAllocator();
@@ -471,13 +288,8 @@ namespace UnityEngine.Rendering.HighDefinition
             return new Vector4(
                 m_CookieAtlas.AtlasTexture.rt.width,
                 m_CookieAtlas.AtlasTexture.rt.height,
-<<<<<<< HEAD
                 1.0f / m_CookieAtlas.AtlasTexture.rt.width,
                 1.0f / m_CookieAtlas.AtlasTexture.rt.height
-=======
-                1.0f/m_CookieAtlas.AtlasTexture.rt.width,
-                1.0f/m_CookieAtlas.AtlasTexture.rt.height
->>>>>>> oldSRP/HDRP/ies_lights
            );
         }
 
@@ -486,11 +298,7 @@ namespace UnityEngine.Rendering.HighDefinition
             float padding = Mathf.Pow(2.0f, m_CookieAtlas.mipPadding) * 2.0f;
             return new Vector4(
                 m_CookieAtlas.AtlasTexture.rt.width,
-<<<<<<< HEAD
                 padding / (float)m_CookieAtlas.AtlasTexture.rt.width,
-=======
-                padding/(float)m_CookieAtlas.AtlasTexture.rt.width,
->>>>>>> oldSRP/HDRP/ies_lights
                 cookieAtlasLastValidMip,
                 0
            );
