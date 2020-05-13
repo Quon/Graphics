@@ -29,6 +29,9 @@
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.sh, inputData.normalWS);
+#if defined(LIGHTMAP_ON) && defined(SHADOWS_SHADOWMASK)  
+    inputData.bakedAtten = SampleShadowMask(input.lightmapUV);
+#endif
 }
 
 PackedVaryings vert(Attributes input)
